@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New Zealand vs South Africa</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.6/controls.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.6/shaka-player.ui.min.js" crossorigin="anonymous"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:sans-serif;}
+.shaka-spinner-container{display:none!important;}
+#wrap{position:absolute;inset:0;}
+#video{width:100%;height:100%;}
+
+#loader{
+  position:fixed;inset:0;background:#000;z-index:999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  transition:opacity .4s;
+}
+#loader.gone{opacity:0;pointer-events:none;}
+#ring{
+  width:42px;height:42px;
+  border:3px solid rgba(232,255,71,.12);
+  border-top-color:#e8ff47;
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#llbl{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:800;letter-spacing:.12em;
+  color:rgba(255,255,255,.25);
+}
+
+/* ── TG POPUP (player variant) ── */
+#tg-bd{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.8);backdrop-filter:blur(10px);
+  transition:opacity .25s;
+}
+#tg-bd.gone{opacity:0;pointer-events:none;}
+
+#tg-box{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);z-index:1001;
+  background:linear-gradient(145deg,#229ED9,#006faa);
+  width:min(340px,92vw);border-radius:20px;
+  padding:28px 24px 22px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  box-shadow:0 24px 60px rgba(0,136,204,.45);
+  animation:tgpop .38s cubic-bezier(.34,1.56,.64,1);
+  transition:opacity .25s,transform .25s;
+}
+#tg-box.gone{opacity:0;transform:translate(-50%,-50%) scale(.88);pointer-events:none;}
+@keyframes tgpop{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.82);}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1);}
+}
+.tg-close{
+  position:absolute;top:12px;right:12px;
+  width:28px;height:28px;background:rgba(255,255,255,.18);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;transition:.15s;border:none;color:#fff;
+}
+.tg-close:hover{background:rgba(255,255,255,.32);}
+.tg-icon{
+  width:58px;height:58px;background:rgba(255,255,255,.2);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+.tg-head{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:23px;font-weight:900;color:#fff;text-align:center;letter-spacing:.02em;
+}
+.tg-sub{font-size:13px;color:rgba(255,255,255,.88);text-align:center;line-height:1.55;}
+.tg-handle{font-size:13px;font-weight:700;color:rgba(255,255,255,.65);}
+.tg-btns{display:flex;gap:8px;width:100%;margin-top:4px;}
+.tg-join{
+  flex:1;background:#fff;color:#006faa;
+  padding:13px;border-radius:9px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:800;letter-spacing:.04em;
+  border:none;cursor:pointer;transition:.15s;
+}
+.tg-join:hover{transform:scale(1.03);box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.tg-skip{
+  padding:13px 16px;background:rgba(255,255,255,.15);color:#fff;
+  border-radius:9px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.tg-skip:hover{background:rgba(255,255,255,.25);}
+
+#wm{
+  position:fixed;top:12px;right:12px;z-index:900;
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,136,204,.18);backdrop-filter:blur(8px);
+  border:1px solid rgba(0,136,204,.28);
+  padding:6px 11px;border-radius:7px;
+  color:#fff;font-size:12px;font-weight:700;
+  text-decoration:none;transition:.2s;
+}
+#wm:hover{background:rgba(0,136,204,.32);}
+</style>
+</head>
+<body>
+
+<a href="https://t.me/CRICUPDATES777" target="_blank" id="wm">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+  @crichdlive
+</a>
+
+<!-- TG Popup (shown on page load, before player starts) -->
+<div id="tg-bd"></div>
+<div id="tg-box">
+  <button class="tg-close" id="tg-close">✕</button>
+  <div class="tg-icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+  </div>
+  <div class="tg-head">Join Telegram</div>
+  <div class="tg-sub">Get live streams & updates instantly. Never miss a match!</div>
+  <div class="tg-handle">@crichdlive</div>
+  <div class="tg-btns">
+    <button class="tg-join" id="tg-join">JOIN NOW</button>
+    <button class="tg-skip" id="tg-skip">Later</button>
+  </div>
+</div>
+
+<div id="wrap" data-shaka-player-container>
+  <video autoplay playsinline data-shaka-player id="video"></video>
+</div>
+
+<div id="loader">
+  <div id="ring"></div>
+  <div id="llbl">LOADING STREAM</div>
+</div>
+
+<script>
+var TG_URL = 'https://t.me/CRICUPDATES777';
+
+// Popup: always show, floats independently — does NOT block the player
+(function(){
+  function dismiss(){
+    document.getElementById('tg-bd').classList.add('gone');
+    document.getElementById('tg-box').classList.add('gone');
+  }
+  document.getElementById('tg-close').onclick = dismiss;
+  document.getElementById('tg-skip').onclick  = dismiss;
+  document.getElementById('tg-bd').onclick    = dismiss;
+  document.getElementById('tg-join').onclick  = function(){ window.open(TG_URL,'_blank'); dismiss(); };
+})();
+
+// Player starts immediately regardless of popup
+initPlayer();
+
+async function initPlayer(){
+  const v=document.getElementById('video');
+  if(!v.ui){setTimeout(initPlayer,80);return;}
+  const p=v.ui.getControls().getPlayer();
+  p.configure({
+    drm:{clearKeys:{"290e09c837da78d5cd961978d390515c":"b748836c71e6a4ca68ef5b5652db6247"}},
+    streaming:{bufferingGoal:30,rebufferingGoal:2,bufferBehind:30}
+  });
+  v.ui.configure({
+    controlPanelElements:["play_pause","mute","volume","spacer","time_and_duration","quality","fullscreen","overflow_menu"]
+  });
+  try{
+    await p.load("https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/tll6uwepxa/out/v1/a7f67cbb33df46539312956427343886/cenc.mpd");
+    document.getElementById('loader').classList.add('gone');
+  }catch(e){
+    console.error(e);
+    document.getElementById('llbl').textContent='STREAM FAILED — TRY ANOTHER SOURCE';
+  }
+}
+if('wakeLock' in navigator)navigator.wakeLock.request('screen').catch(()=>{});
+</script>
+</body>
+</html>
